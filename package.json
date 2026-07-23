@@ -1,0 +1,16 @@
+{
+  "name": "booking-app-backend",
+  "version": "1.0.0",
+  "description": "Backend de reservas de entrevistas con feed ICS en vivo para Apple Calendar / Structured",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
