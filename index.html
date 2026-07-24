@@ -1,6 +1,15 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Reservar entrevista</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2ZmYWI2ZSIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2ZmNmEyYiIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPgo8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNiIgZmlsbD0idXJsKCNnKSIvPgo8cmVjdCB4PSIxNCIgeT0iMjAiIHdpZHRoPSIzNiIgaGVpZ2h0PSIzMCIgcng9IjUiIGZpbGw9IiNmZmYiLz4KPHJlY3QgeD0iMTQiIHk9IjIwIiB3aWR0aD0iMzYiIGhlaWdodD0iOSIgcng9IjUiIGZpbGw9IiMxYzE4MTUiLz4KPHJlY3QgeD0iMjEiIHk9IjEzIiB3aWR0aD0iNSIgaGVpZ2h0PSIxMSIgcng9IjIuNSIgZmlsbD0iIzFjMTgxNSIvPgo8cmVjdCB4PSIzOCIgeT0iMTMiIHdpZHRoPSI1IiBoZWlnaHQ9IjExIiByeD0iMi41IiBmaWxsPSIjMWMxODE1Ii8+CjxwYXRoIGQ9Ik0yMiAzOWw2IDYgMTQtMTQiIHN0cm9rZT0iI2ZmNmEyYiIgc3Ryb2tlLXdpZHRoPSI0LjUiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
+</head>
+<body>
 <style>
   :root{
     --cream:#efe5d5; --cream-2:#e6d9c3;
@@ -119,7 +128,27 @@
   .interview-form{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .interview-form > div{grid-column:span 1;}
   .interview-form .full{grid-column:1 / -1;}
-  @media (max-width:600px){.interview-form{grid-template-columns:1fr;}}
+  @media (max-width:600px){.interview-form{grid-template-columns:1fr;}}  @media (max-width:640px){
+    #app{padding:18px 12px 50px;}
+    .logo-banner{padding:14px 16px;gap:14px;}
+    .logo-img{height:48px;max-width:140px;}
+    .logo-ph{height:48px;padding:0 16px;font-size:13px;}
+    .tabs{width:100%;overflow-x:auto;justify-content:flex-start;}
+    .tab-btn{padding:8px 14px;white-space:nowrap;}
+    .subnav{overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px;}
+    .subnav button{white-space:nowrap;}
+    .card{padding:20px 16px;border-radius:20px;}
+    .intro-title{font-size:21px;}
+    .grid-2{gap:16px;}
+    .date-list{grid-template-columns:repeat(auto-fill,minmax(52px,1fr));}
+    .slot-grid{grid-template-columns:repeat(auto-fill,minmax(68px,1fr));}
+    .btn-black, .btn-ghost{padding:11px 16px;font-size:13px;}
+    .position-head input[type=text]{max-width:100%;font-size:15px;}
+    .dur-row{gap:12px;}
+    .ranges{margin-left:0;}
+    .add-range-btn{margin-left:0;}
+    .booking-item > div:first-child{width:100%;}
+  }
 </style>
 
 <div id="app"><div class="loading">Cargando…</div></div>
@@ -155,6 +184,7 @@ const isConfigured = BACKEND_URL && BACKEND_URL.indexOf('http') === 0;
 async function apiGet(action, extraParams){
   const url = new URL(BACKEND_URL);
   url.searchParams.set('action', action);
+  url.searchParams.set('token', state.adminToken || '');
   Object.entries(extraParams||{}).forEach(([k,v])=> url.searchParams.set(k, v));
   const res = await fetch(url.toString());
   const data = await res.json();
@@ -164,6 +194,7 @@ async function apiGet(action, extraParams){
 async function apiPost(body){
   // Sin headers custom a propósito: así el navegador manda text/plain y
   // Apps Script no exige un preflight CORS que no sabe responder.
+  body.token = state.adminToken || '';
   const res = await fetch(BACKEND_URL, { method:'POST', body: JSON.stringify(body) });
   const data = await res.json();
   if(!data.ok) throw new Error(data.error || 'Error de servidor');
@@ -177,7 +208,7 @@ const DEFAULT_MESSAGES = {
 };
 
 let state = {
-  view: 'public', hostTab: 'marca',
+  view: 'public', hostTab: 'marca', authed:false, adminToken:'',
   branding: {logo1:null, logo2:null},
   messages: {...DEFAULT_MESSAGES},
   notifications: { enabled:false, serviceId:'', templateId:'', publicKey:'', notifyEmail:'' },
@@ -212,8 +243,21 @@ async function saveConfigToServer(flashMsg){
 
 function switchView(v){
   state.view = v; state.step='intro'; state.selectedPositionId=null; state.selectedDate=null; state.selectedSlot=null; state.confirmed=null;
-  if(v==='host'){ loadHostData().then(render).catch(e=>{ state.loadError = e.message; render(); }); }
+  if(v==='host' && state.authed){ loadHostData().then(render).catch(e=>{ state.loadError = e.message; render(); }); }
   render();
+}
+
+async function tryAdminLogin(token){
+  state.adminToken = token;
+  try{
+    await loadHostData();
+    state.authed = true;
+    sessionStorage.setItem('adminToken', token);
+    state.loadError = '';
+    render();
+  }catch(e){
+    alert('Token incorrecto: ' + e.message);
+  }
 }
 
 function rangesForPositionDate(pos, d){
@@ -291,6 +335,24 @@ function render(){
         <p class="subtle">Todavía no configuraste la URL de tu Web App de Apps Script. Abrí este archivo, buscá la línea
         <code>const BACKEND_URL = ...</code> al principio del script y pegá ahí tu URL (o agregá <code>?backend=TU_URL</code> al final del link). Mirá el README para los pasos completos.</p>
       </div></div>`;
+    return;
+  }
+  if(state.view==='host' && !state.authed){
+    app.innerHTML = `
+      <div class="wrap" style="max-width:420px;margin:80px auto;">
+        <div class="card">
+          <h2 class="section-title">Acceso de anfitrión</h2>
+          <p class="subtle">Ingresá la contraseña que configuraste en las Propiedades del script (ADMIN_TOKEN).</p>
+          <input type="password" id="admin-token-input" placeholder="Contraseña" style="margin-bottom:12px;"/>
+          <button class="btn-black" id="admin-login-btn"><span>Entrar</span><span class="arrow">→</span></button>
+          <div style="margin-top:14px;"><button class="back-link" data-action="view-public">← Volver a Reservar</button></div>
+        </div>
+      </div>`;
+    document.getElementById('admin-login-btn').onclick = ()=>{
+      const v = document.getElementById('admin-token-input').value.trim();
+      if(v) tryAdminLogin(v);
+    };
+    document.querySelectorAll('[data-action="view-public"]').forEach(el=>el.onclick=()=>switchView('public'));
     return;
   }
   let html = `
@@ -524,11 +586,18 @@ function renderCandidatos(){
 function renderCandidateResults(){
   if(!state.candidateSearchDone) return `<div class="empty">Escribí algo y tocá "Buscar" (dejalo vacío para ver a todos).</div>`;
   if(!state.candidateSearchResults.length) return `<div class="empty">No se encontraron candidatos.</div>`;
-  return state.candidateSearchResults.map(c=>`
+  return state.candidateSearchResults.map(c=>{
+    const isOpen = state.openInterviewFormFor === c.bookingId;
+    const pseudoBooking = { id: c.bookingId, name: c.nombre, email: c.email, phone: c.telefono, positionName: c.puesto };
+    return `
     <div class="candidate-card">
       <div class="candidate-top">
         <div class="candidate-name">${escapeHtml(c.nombre)}</div>
-        <div class="candidate-tags"><span class="tag">${escapeHtml(c.puesto||'—')}</span>${c.modalidad?`<span class="tag">${escapeHtml(c.modalidad)}</span>`:''}</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="candidate-tags"><span class="tag">${escapeHtml(c.puesto||'—')}</span>${c.modalidad?`<span class="tag">${escapeHtml(c.modalidad)}</span>`:''}</div>
+          <button class="btn-outline-sm" data-action="toggle-interview" data-id="${c.bookingId}">${isOpen ? 'Cerrar' : 'Editar'}</button>
+          <button class="btn-danger-sm" data-action="delete-candidate" data-id="${c.bookingId}">eliminar</button>
+        </div>
       </div>
       <div class="candidate-grid">
         <div><span class="k">Email</span>${escapeHtml(c.email)}</div>
@@ -541,8 +610,10 @@ function renderCandidateResults(){
         <div><span class="k">Posible inicio</span>${escapeHtml(c.fechaPosibleInicio||'—')}</div>
       </div>
       ${c.infoExtra ? `<div style="margin-top:8px;font-size:12.5px;"><span style="color:var(--ink-soft);">Info extra:</span> ${escapeHtml(c.infoExtra)}</div>` : ''}
+      ${isOpen ? renderInterviewForm(pseudoBooking, c) : ''}
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 function renderPublic(){
@@ -722,8 +793,28 @@ function attachHandlers(){
         state.saveMsg = 'Ficha guardada ✓';
         const c = await apiGet('searchCandidates', {q:''});
         state.candidates = c.candidates;
+        if(state.candidateSearchDone){
+          const r2 = await apiGet('searchCandidates', {q: state.candidateSearchQuery});
+          state.candidateSearchResults = r2.candidates;
+        }
+        state.openInterviewFormFor = null;
         render(); setTimeout(()=>{state.saveMsg='';render();},2000);
       }catch(e){ alert('No se pudo guardar la ficha: ' + e.message); }
+    };
+  });
+  document.querySelectorAll('[data-action="delete-candidate"]').forEach(el=>{
+    el.onclick = async ()=>{
+      if(!confirm('¿Eliminar la ficha de este candidato? Esto no borra la reserva, solo la ficha de entrevista.')) return;
+      try{
+        await apiPost({ action:'deleteCandidate', bookingId: el.dataset.id });
+        const c = await apiGet('searchCandidates', {q:''});
+        state.candidates = c.candidates;
+        if(state.candidateSearchDone){
+          const r2 = await apiGet('searchCandidates', {q: state.candidateSearchQuery});
+          state.candidateSearchResults = r2.candidates;
+        }
+        render();
+      }catch(e){ alert('No se pudo eliminar: ' + e.message); }
     };
   });
 
@@ -792,8 +883,17 @@ function attachHandlers(){
 // ---------------------------------------------------------------------
 (async function init(){
   if(!isConfigured){ render(); return; }
-  try{ await loadPublicConfig(); render(); }
-  catch(e){ state.loadError = e.message; render(); }
+  const saved = sessionStorage.getItem('adminToken');
+  if(saved) state.adminToken = saved;
+  try{ await loadPublicConfig(); }
+  catch(e){ state.loadError = e.message; render(); return; }
+  if(saved){
+    try{ await loadHostData(); state.authed = true; }catch(e){ state.authed = false; state.adminToken=''; }
+  }
+  render();
 })();
 </script>
 
+
+</body>
+</html>
