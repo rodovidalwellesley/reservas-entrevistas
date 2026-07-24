@@ -1,0 +1,799 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --cream:#efe5d5; --cream-2:#e6d9c3;
+    --glass:rgba(255,255,255,0.55); --glass-border:rgba(255,255,255,0.8);
+    --ink:#231f1a; --ink-soft:#7a6f61; --ink-faint:#a89d8c;
+    --black:#1c1815; --orange-1:#ffab6e; --orange-2:#ff6a2b; --line:rgba(35,31,26,0.12); --white:#ffffff;
+  }
+  *{box-sizing:border-box;} body{margin:0;}
+  #app{position:relative;font-family:'Inter', sans-serif;color:var(--ink);min-height:100vh;padding:36px 18px 70px;
+    background:radial-gradient(ellipse 900px 600px at 15% -10%, #f6efe3 0%, transparent 60%),
+      radial-gradient(ellipse 700px 700px at 105% 15%, #e9c9a6 0%, transparent 55%),
+      linear-gradient(180deg, var(--cream) 0%, var(--cream-2) 100%); overflow:hidden;}
+  .blob{position:absolute;border-radius:50%;filter:blur(70px);z-index:0;pointer-events:none;}
+  .blob1{width:420px;height:420px;top:-140px;right:-120px;background:radial-gradient(circle at 30% 30%,#ffd9ae,#ff9a4d 70%);opacity:.55;}
+  .blob2{width:320px;height:320px;bottom:-100px;left:-100px;background:radial-gradient(circle at 40% 40%,#fff,#e7dcc6 75%);opacity:.7;}
+  .blob3{width:200px;height:200px;bottom:20%;right:6%;background:radial-gradient(circle at 35% 35%,#ffe4c4,#ff8a3d 80%);opacity:.35;}
+  .wrap{max-width:900px;margin:0 auto;position:relative;z-index:1;}
+  .topbar{display:flex;flex-direction:column;align-items:center;gap:18px;margin-bottom:30px;}
+  .logo-banner{
+    width:100%;display:flex;align-items:center;justify-content:center;gap:26px;
+    background:var(--glass-strong,var(--glass));backdrop-filter:blur(18px);border:1px solid var(--glass-border);
+    border-radius:24px;padding:20px 28px;box-shadow:0 14px 34px -18px rgba(35,31,26,0.22);flex-wrap:wrap;
+  }
+  .logos{display:flex;align-items:center;gap:26px;flex-wrap:wrap;justify-content:center;}
+  .logo-img{height:76px;max-width:220px;object-fit:contain;}
+  .logo-sep{width:1px;height:52px;background:var(--line);}
+  .logo-ph{height:76px;padding:0 26px;border-radius:16px;background:rgba(255,255,255,0.5);border:1px dashed var(--line);display:flex;align-items:center;font-family:'Sora',sans-serif;font-weight:700;font-size:16px;color:var(--ink-soft);}
+  .tabs{display:flex;gap:4px;background:var(--glass);backdrop-filter:blur(16px);padding:5px;border-radius:999px;border:1px solid var(--glass-border);}
+  .tab-btn{font-family:'Sora',sans-serif;font-size:12.5px;font-weight:600;padding:9px 18px;border-radius:999px;border:none;cursor:pointer;background:transparent;color:var(--ink-soft);}
+  .tab-btn.active{background:var(--black);color:#fff;}
+  .card{background:var(--glass);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid var(--glass-border);border-radius:28px;padding:30px;box-shadow:0 20px 50px -20px rgba(35,31,26,0.18);}
+  .card + .card{margin-top:18px;}
+  h2.section-title{font-family:'Sora',sans-serif;font-weight:700;font-size:20px;margin:0 0 4px;letter-spacing:-.01em;}
+  .subtle{color:var(--ink-soft);font-size:13.5px;margin:0 0 18px;line-height:1.5;}
+  .subnav{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap;}
+  .subnav button{font-family:'Sora',sans-serif;font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:var(--white);cursor:pointer;color:var(--ink-soft);}
+  .subnav button.active{background:var(--black);color:#fff;border-color:var(--black);}
+  label.fieldlabel{display:block;font-family:'Sora',sans-serif;font-size:11px;text-transform:uppercase;color:var(--ink-soft);letter-spacing:.05em;margin-bottom:6px;}
+  input[type=text],input[type=email],input[type=tel],textarea,select{width:100%;padding:11px 13px;border-radius:12px;border:1px solid var(--line);background:var(--white);color:var(--ink);font-family:'Inter',sans-serif;font-size:14px;}
+  textarea{resize:vertical;min-height:80px;}
+  input[type=time],input[type=number],input[type=date]{padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--white);font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink);}
+  .btn-black{font-family:'Sora',sans-serif;font-weight:700;font-size:13.5px;background:var(--black);color:#fff;border:none;border-radius:999px;padding:12px 22px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;}
+  .btn-black:hover{background:#000;}
+  .btn-black .arrow{width:20px;height:20px;border-radius:50%;background:var(--orange-2);display:flex;align-items:center;justify-content:center;font-size:11px;}
+  .btn-ghost{font-family:'Sora',sans-serif;font-weight:600;font-size:13px;background:transparent;border:1.5px solid var(--black);color:var(--black);border-radius:999px;padding:10px 18px;cursor:pointer;}
+  .btn-danger-sm{font-family:'Sora',sans-serif;font-weight:600;font-size:11.5px;background:transparent;border:none;color:#c0472a;cursor:pointer;text-decoration:underline;}
+  .save-msg{font-size:12px;color:var(--orange-2);margin-left:8px;font-family:'Sora',sans-serif;font-weight:600;}
+  .back-link{font-family:'Sora',sans-serif;font-weight:600;font-size:12.5px;color:var(--ink-soft);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;margin-bottom:16px;}
+  .position-card{border:1px solid var(--line);border-radius:20px;padding:20px;margin-bottom:16px;background:rgba(255,255,255,0.5);}
+  .position-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+  .position-head input[type=text]{font-family:'Sora',sans-serif;font-weight:700;font-size:16px;border:none;background:transparent;padding:4px 0;max-width:260px;}
+  .dur-row{display:flex;gap:20px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+  .dur-field{display:flex;align-items:center;gap:8px;}
+  .dur-field span{font-size:12.5px;color:var(--ink-soft);font-family:'Sora',sans-serif;font-weight:600;}
+  .day-block{border-bottom:1px dashed var(--line);padding:10px 0;}
+  .day-block:last-child{border-bottom:none;}
+  .day-block-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .switch{position:relative;width:36px;height:20px;flex-shrink:0;}
+  .switch input{opacity:0;width:0;height:0;}
+  .slider{position:absolute;cursor:pointer;inset:0;background:var(--line);border-radius:999px;transition:.15s;}
+  .slider:before{content:"";position:absolute;height:14px;width:14px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.15s;}
+  input:checked + .slider{background:var(--black);} input:checked + .slider:before{transform:translateX(16px);}
+  .day-name{font-family:'Sora',sans-serif;font-weight:600;font-size:13.5px;width:80px;}
+  .ranges{display:flex;flex-direction:column;gap:8px;margin-left:46px;}
+  .range-row{display:flex;align-items:center;gap:8px;}
+  .range-sep{color:var(--ink-faint);font-size:12px;}
+  .add-range-btn{font-family:'Sora',sans-serif;font-size:11.5px;font-weight:600;color:var(--orange-2);background:none;border:none;cursor:pointer;margin-left:46px;margin-top:2px;}
+  .rm-range{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;}
+  .logo-upload-row{display:flex;gap:20px;flex-wrap:wrap;}
+  .logo-slot{width:150px;height:90px;border:1.5px dashed var(--line);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:var(--white);position:relative;overflow:hidden;}
+  .logo-slot img{max-width:100%;max-height:100%;object-fit:contain;padding:8px;}
+  .logo-slot .up-label{font-family:'Sora',sans-serif;font-size:11.5px;color:var(--ink-soft);font-weight:600;}
+  .logo-slot input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
+  .logo-remove{position:absolute;top:4px;right:4px;background:var(--black);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;z-index:2;}
+  .booking-item{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px dashed var(--line);font-size:13.5px;flex-wrap:wrap;gap:6px;}
+  .booking-item:last-child{border-bottom:none;}
+  .b-name{font-weight:600;} .b-pos{font-family:'Sora',sans-serif;font-size:11px;color:var(--orange-2);font-weight:700;}
+  .b-when{font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--ink-soft);}
+  .empty{color:var(--ink-soft);font-size:13.5px;font-style:italic;}
+  .intro-title{font-family:'Sora',sans-serif;font-weight:800;font-size:26px;letter-spacing:-.01em;margin:0 0 12px;line-height:1.2;}
+  .intro-msg{white-space:pre-wrap;font-size:14.5px;line-height:1.65;color:var(--ink);margin-bottom:22px;}
+  .grid-2{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;} @media (max-width:680px){.grid-2{grid-template-columns:1fr;}}
+  .date-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;max-height:340px;overflow-y:auto;padding-right:4px;}
+  .date-chip{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;border:1px solid var(--line);border-radius:14px;cursor:pointer;background:var(--white);transition:.12s;}
+  .date-chip .dow{font-family:'Sora',sans-serif;font-size:10px;color:var(--ink-soft);text-transform:uppercase;font-weight:700;}
+  .date-chip .dnum{font-family:'Sora',sans-serif;font-weight:800;font-size:20px;}
+  .date-chip .dmon{font-size:10px;color:var(--ink-soft);}
+  .date-chip.selected{background:linear-gradient(135deg,var(--orange-1),var(--orange-2));color:#fff;border-color:transparent;}
+  .date-chip.selected .dow,.date-chip.selected .dmon{color:rgba(255,255,255,0.85);}
+  .slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;}
+  .slot-btn{font-family:'IBM Plex Mono',monospace;font-size:13px;padding:9px 6px;border:1px solid var(--line);border-radius:10px;background:var(--white);cursor:pointer;text-align:center;}
+  .slot-btn:hover{border-color:var(--black);}
+  .slot-btn.selected{background:linear-gradient(135deg,var(--orange-1),var(--orange-2));border-color:transparent;color:#fff;}
+  .locked-field{background:rgba(35,31,26,0.05);border-radius:12px;padding:10px 13px;font-size:13.5px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
+  .locked-field .lval{font-weight:600;font-family:'Sora',sans-serif;}
+  form.contact-form > *{margin-bottom:14px;}
+  .confirm-badge{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--orange-1),var(--orange-2));color:#fff;font-family:'Sora',sans-serif;font-weight:700;font-size:12px;padding:6px 14px;border-radius:999px;margin-bottom:16px;}
+  .confirm-detail{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13.5px;}
+  .confirm-detail:last-child{border-bottom:none;}
+  .confirm-detail .k{color:var(--ink-soft);} .confirm-detail .v{font-weight:600;font-family:'Sora',sans-serif;}
+  .confirm-msg{white-space:pre-wrap;font-size:14px;line-height:1.6;margin-top:18px;padding-top:18px;border-top:1px solid var(--line);}
+  .actions-row{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
+  .notice{font-size:12px;color:var(--ink-soft);margin-top:16px;line-height:1.55;border-top:1px dashed var(--line);padding-top:12px;}
+  .loading{padding:40px;text-align:center;color:var(--ink-soft);font-family:'Sora',sans-serif;font-size:13px;}
+  .conn-banner{background:#3a2e22;color:#f3e6d3;border-radius:16px;padding:16px 20px;margin-bottom:18px;font-size:13px;line-height:1.6;}
+  .conn-banner code{background:rgba(255,255,255,0.15);padding:1px 6px;border-radius:6px;}
+  .search-row{display:flex;gap:10px;margin-bottom:20px;}
+  .search-row input{flex:1;}
+  .candidate-card{border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-bottom:12px;background:rgba(255,255,255,0.5);}
+  .candidate-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;}
+  .candidate-name{font-family:'Sora',sans-serif;font-weight:700;font-size:15px;}
+  .candidate-tags{display:flex;gap:6px;flex-wrap:wrap;}
+  .tag{font-family:'IBM Plex Mono',monospace;font-size:11px;background:rgba(35,31,26,0.06);padding:3px 9px;border-radius:999px;color:var(--ink-soft);}
+  .candidate-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px 16px;font-size:12.5px;}
+  .candidate-grid .k{color:var(--ink-soft);display:block;font-family:'Sora',sans-serif;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;}
+  .interview-form{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .interview-form > div{grid-column:span 1;}
+  .interview-form .full{grid-column:1 / -1;}
+  @media (max-width:600px){.interview-form{grid-template-columns:1fr;}}
+</style>
+
+<div id="app"><div class="loading">Cargando…</div></div>
+
+<script>
+// ======================================================================
+// CONFIGURACIÓN DE CONEXIÓN
+// Pegá acá la URL de tu Web App de Apps Script (ver README), o agregá
+// ?backend=TU_URL al final del link publicado para probarlo sin editar código.
+// ======================================================================
+const params = new URLSearchParams(window.location.search);
+const BACKEND_URL = params.get('backend') || 'https://script.google.com/macros/s/AKfycbz512T0navmKsgMMRQbpkAdE5p-8C2DUZ3FyL8ZYvaw9o4o1i2vqR8Daj_Bc7SV8MEa/exec';
+
+const DAYS = [
+  {key:'sun', label:'Domingo', short:'Dom'}, {key:'mon', label:'Lunes', short:'Lun'},
+  {key:'tue', label:'Martes', short:'Mar'}, {key:'wed', label:'Miércoles', short:'Mié'},
+  {key:'thu', label:'Jueves', short:'Jue'}, {key:'fri', label:'Viernes', short:'Vie'},
+  {key:'sat', label:'Sábado', short:'Sáb'},
+];
+const MONTHS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const LOCAL_DESTINO_OPTS = ['Florinda','IPA','Florinda Acoyte','Florinda Marechal','IPA Acoyte','IPA San Martin','Todos'];
+const MODALIDAD_OPTS = ['Fija','Eventual','Findes','Pref Fija','Pref Eventual'];
+
+function uid(){ return Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7); }
+function pad(n){return n.toString().padStart(2,'0');}
+function dateKey(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function escapeHtml(s){ const d = document.createElement('div'); d.innerText = s ?? ''; return d.innerHTML; }
+function fmtDateLong(d){ return DAYS[d.getDay()].short + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()]; }
+
+const isConfigured = BACKEND_URL && BACKEND_URL.indexOf('http') === 0;
+
+// ---------- Cliente de la API (Apps Script) ----------
+async function apiGet(action, extraParams){
+  const url = new URL(BACKEND_URL);
+  url.searchParams.set('action', action);
+  Object.entries(extraParams||{}).forEach(([k,v])=> url.searchParams.set(k, v));
+  const res = await fetch(url.toString());
+  const data = await res.json();
+  if(!data.ok) throw new Error(data.error || 'Error de servidor');
+  return data;
+}
+async function apiPost(body){
+  // Sin headers custom a propósito: así el navegador manda text/plain y
+  // Apps Script no exige un preflight CORS que no sabe responder.
+  const res = await fetch(BACKEND_URL, { method:'POST', body: JSON.stringify(body) });
+  const data = await res.json();
+  if(!data.ok) throw new Error(data.error || 'Error de servidor');
+  return data;
+}
+
+const DEFAULT_MESSAGES = {
+  introTitle: 'Reservá tu entrevista',
+  intro: 'Gracias por tu interés en sumarte al equipo.\nElegí el puesto al que te postulás y después una fecha y horario disponible para tu entrevista.',
+  confirmation: 'Tu entrevista para el puesto de {puesto} quedó confirmada para el {fecha} a las {hora}.\nTe esperamos con puntualidad. ¡Gracias por postularte!'
+};
+
+let state = {
+  view: 'public', hostTab: 'marca',
+  branding: {logo1:null, logo2:null},
+  messages: {...DEFAULT_MESSAGES},
+  notifications: { enabled:false, serviceId:'', templateId:'', publicKey:'', notifyEmail:'' },
+  positions: [], bookings: [], candidates: [],
+  saveMsg:'', loadError:'',
+  step: 'intro', selectedPositionId: null, selectedDate: null, selectedSlot: null,
+  availableDates: [], availableSlots: [],
+  confirmed: null,
+  candidateSearchQuery:'', candidateSearchResults:[], candidateSearchDone:false,
+  openInterviewFormFor: null,
+};
+
+async function loadPublicConfig(){
+  const r = await apiGet('getConfig');
+  state.branding = r.config.branding;
+  state.messages = { ...DEFAULT_MESSAGES, ...r.config.messages };
+  state.notifications = r.config.notifications || state.notifications;
+  state.positions = r.config.positions || [];
+}
+async function loadHostData(){
+  await loadPublicConfig();
+  const [b, c] = await Promise.all([ apiGet('getBookings'), apiGet('searchCandidates', {q:''}) ]);
+  state.bookings = b.bookings;
+  state.candidates = c.candidates;
+}
+async function saveConfigToServer(flashMsg){
+  try{
+    await apiPost({ action:'saveConfig', config: { branding: state.branding, messages: state.messages, notifications: state.notifications, positions: state.positions } });
+    if(flashMsg){ state.saveMsg = 'Guardado ✓'; render(); setTimeout(()=>{state.saveMsg='';render();},2000); }
+  }catch(e){ state.saveMsg = 'Error: ' + e.message; render(); }
+}
+
+function switchView(v){
+  state.view = v; state.step='intro'; state.selectedPositionId=null; state.selectedDate=null; state.selectedSlot=null; state.confirmed=null;
+  if(v==='host'){ loadHostData().then(render).catch(e=>{ state.loadError = e.message; render(); }); }
+  render();
+}
+
+function rangesForPositionDate(pos, d){
+  const key = dateKey(d);
+  const specific = (pos.specificDates||[]).find(sd=>sd.date===key);
+  if(specific) return specific.ranges || [];
+  const cfg = pos.days[DAYS[d.getDay()].key];
+  if(!cfg || !cfg.enabled) return [];
+  return cfg.ranges || [];
+}
+function emptyDays(){
+  const o = {}; DAYS.forEach(d=>{ o[d.key] = {enabled:false, ranges:[]}; });
+  o.mon = {enabled:true, ranges:[{start:'09:00',end:'13:00'},{start:'14:00',end:'18:00'}]};
+  o.tue = {enabled:true, ranges:[{start:'09:00',end:'13:00'},{start:'14:00',end:'18:00'}]};
+  o.wed = {enabled:true, ranges:[{start:'09:00',end:'13:00'},{start:'14:00',end:'18:00'}]};
+  o.thu = {enabled:true, ranges:[{start:'09:00',end:'13:00'},{start:'14:00',end:'18:00'}]};
+  o.fri = {enabled:true, ranges:[{start:'09:00',end:'14:00'}]};
+  return o;
+}
+function defaultPosition(name){ return { id: uid(), name: name || 'Puesto general', duration:30, gap:10, days: emptyDays(), specificDates: [] }; }
+function getPos(id){ return state.positions.find(p=>p.id===id); }
+
+let emailJsLoaded = false;
+function loadEmailJs(){
+  return new Promise((resolve, reject)=>{
+    if(emailJsLoaded && window.emailjs){ resolve(); return; }
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
+    script.onload = ()=>{ emailJsLoaded = true; resolve(); };
+    script.onerror = ()=> reject(new Error('No se pudo cargar EmailJS'));
+    document.head.appendChild(script);
+  });
+}
+async function sendBookingNotification(booking){
+  const n = state.notifications;
+  if(!n.enabled || !n.serviceId || !n.templateId || !n.publicKey || !n.notifyEmail) return;
+  try{
+    await loadEmailJs();
+    window.emailjs.init(n.publicKey);
+    const [y,m,d] = booking.date.split('-');
+    await window.emailjs.send(n.serviceId, n.templateId, {
+      puesto: booking.positionName, fecha: `${d}/${m}`, hora: booking.time,
+      nombre: booking.name, email: booking.email, telefono: booking.phone, to_email: n.notifyEmail,
+    });
+  }catch(e){ console.error('No se pudo enviar la notificación por email:', e); }
+}
+
+function buildIcs(booking, positionName){
+  const [y,m,d] = booking.date.split('-').map(Number);
+  const [hh,mm] = booking.time.split(':').map(Number);
+  const start = new Date(y,m-1,d,hh,mm);
+  const end = new Date(start.getTime() + 30*60000);
+  function fmt(dt){ return dt.getFullYear()+pad(dt.getMonth()+1)+pad(dt.getDate())+'T'+pad(dt.getHours())+pad(dt.getMinutes())+'00'; }
+  return ['BEGIN:VCALENDAR','VERSION:2.0','BEGIN:VEVENT','UID:'+booking.id+'@bookingapp',
+    'DTSTART:'+fmt(start),'DTEND:'+fmt(end),'SUMMARY:Entrevista - '+positionName,
+    'DESCRIPTION:Entrevista para el puesto de '+positionName+' con '+booking.name,'END:VEVENT','END:VCALENDAR'].join('\r\n');
+}
+function downloadIcs(booking, positionName){
+  const content = buildIcs(booking, positionName);
+  const blob = new Blob([content], {type:'text/calendar'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'entrevista.ics'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ---------------------------------------------------------------------
+// RENDER
+// ---------------------------------------------------------------------
+function render(){
+  const app = document.getElementById('app');
+  if(!isConfigured){
+    app.innerHTML = `
+      <div class="wrap"><div class="card">
+        <h2 class="section-title">Falta conectar la planilla</h2>
+        <p class="subtle">Todavía no configuraste la URL de tu Web App de Apps Script. Abrí este archivo, buscá la línea
+        <code>const BACKEND_URL = ...</code> al principio del script y pegá ahí tu URL (o agregá <code>?backend=TU_URL</code> al final del link). Mirá el README para los pasos completos.</p>
+      </div></div>`;
+    return;
+  }
+  let html = `
+    <div class="blob blob1"></div><div class="blob blob2"></div><div class="blob blob3"></div>
+    <div class="wrap">
+      <div class="topbar">
+        <div class="logo-banner">
+          ${state.branding.logo1 ? `<img class="logo-img" src="${state.branding.logo1}"/>` : ''}
+          ${(state.branding.logo1 && state.branding.logo2) ? `<div class="logo-sep"></div>` : ''}
+          ${state.branding.logo2 ? `<img class="logo-img" src="${state.branding.logo2}"/>` : ''}
+          ${(!state.branding.logo1 && !state.branding.logo2) ? `<div class="logo-ph">Tu empresa</div>` : ''}
+        </div>
+        <div class="tabs">
+          <button class="tab-btn ${state.view==='public'?'active':''}" data-action="view-public">Reservar</button>
+          <button class="tab-btn ${state.view==='host'?'active':''}" data-action="view-host">Anfitrión</button>
+        </div>
+      </div>
+  `;
+  if(state.loadError){
+    html += `<div class="conn-banner">No se pudo conectar con la planilla: ${escapeHtml(state.loadError)}. Revisá que la URL de <code>BACKEND_URL</code> sea correcta y que el Web App esté desplegado con acceso "Cualquier usuario".</div>`;
+  }
+  html += state.view === 'host' ? renderHost() : renderPublic();
+  html += `</div>`;
+  app.innerHTML = html;
+  attachHandlers();
+}
+
+function renderHost(){
+  const tabs = [
+    {key:'marca', label:'Marca'}, {key:'mensajes', label:'Mensajes'},
+    {key:'puestos', label:'Puestos y horarios'}, {key:'notificaciones', label:'Notificaciones'},
+    {key:'reservas', label:'Reservas'}, {key:'candidatos', label:'Candidatos'},
+  ];
+  let sub = tabs.map(t=>`<button class="${state.hostTab===t.key?'active':''}" data-host-tab="${t.key}">${t.label}</button>`).join('');
+  let body = '';
+  if(state.hostTab==='marca') body = renderMarca();
+  else if(state.hostTab==='mensajes') body = renderMensajes();
+  else if(state.hostTab==='puestos') body = renderPuestos();
+  else if(state.hostTab==='notificaciones') body = renderNotificaciones();
+  else if(state.hostTab==='candidatos') body = renderCandidatos();
+  else body = renderReservas();
+  return `<div class="subnav">${sub}</div>${body}`;
+}
+
+function renderMarca(){
+  return `<div class="card">
+    <h2 class="section-title">Logos del encabezado</h2>
+    <p class="subtle">Subí hasta 2 logos. Se guardan como archivos en tu Google Drive (no ocupan lugar en la planilla).</p>
+    <div class="logo-upload-row">${renderLogoSlot(1)}${renderLogoSlot(2)}</div>
+    <div class="notice">Usá imágenes livianas (PNG/SVG, idealmente menores a 1 MB).</div>
+  </div>`;
+}
+function renderLogoSlot(n){
+  const val = state.branding['logo'+n];
+  return `<div class="logo-slot">
+    ${val ? `<img src="${val}"/><button class="logo-remove" data-action="remove-logo" data-n="${n}">✕</button>` : `<span class="up-label">+ Logo ${n}</span>`}
+    <input type="file" accept="image/*" data-action="upload-logo" data-n="${n}" ${val?'style="display:none"':''}/>
+  </div>`;
+}
+
+function renderMensajes(){
+  return `<div class="card">
+      <h2 class="section-title">Mensaje previo (antes de elegir fecha)</h2>
+      <label class="fieldlabel">Título</label>
+      <input type="text" id="msg-intro-title" value="${escapeHtml(state.messages.introTitle||'')}" style="margin-bottom:14px;"/>
+      <label class="fieldlabel">Texto</label>
+      <textarea id="msg-intro">${escapeHtml(state.messages.intro)}</textarea>
+    </div>
+    <div class="card">
+      <h2 class="section-title">Mensaje de confirmación</h2>
+      <p class="subtle">Variables: <code>{puesto}</code>, <code>{fecha}</code>, <code>{hora}</code>.</p>
+      <textarea id="msg-confirm">${escapeHtml(state.messages.confirmation)}</textarea>
+      <div style="margin-top:14px;"><button class="btn-black" data-action="save-messages"><span>Guardar mensajes</span><span class="arrow">→</span></button><span class="save-msg">${state.saveMsg}</span></div>
+    </div>`;
+}
+
+function renderPuestos(){
+  let posHtml = state.positions.map(pos => renderPositionCard(pos)).join('');
+  return `<div class="card">
+      <h2 class="section-title">Puestos y horarios de entrevista</h2>
+      <p class="subtle">Cada puesto tiene su propia agenda: días recurrentes, fechas puntuales, uno o más rangos horarios, duración y espacio entre citas.</p>
+      ${posHtml}
+      <button class="btn-ghost" data-action="add-position">+ Agregar puesto</button>
+      <div style="margin-top:16px;"><button class="btn-black" data-action="save-positions"><span>Guardar todo</span><span class="arrow">→</span></button><span class="save-msg">${state.saveMsg}</span></div>
+    </div>`;
+}
+function renderPositionCard(pos){
+  if(!pos.specificDates) pos.specificDates = [];
+  let specificHtml = pos.specificDates.map((sd, sidx)=>{
+    let rangesHtml = (sd.ranges||[]).map((r,ridx)=>`
+      <div class="range-row">
+        <input type="time" data-action="sd-range" data-pos="${pos.id}" data-sidx="${sidx}" data-ridx="${ridx}" data-rfield="start" value="${r.start}"/>
+        <span class="range-sep">–</span>
+        <input type="time" data-action="sd-range" data-pos="${pos.id}" data-sidx="${sidx}" data-ridx="${ridx}" data-rfield="end" value="${r.end}"/>
+        <button class="rm-range" data-action="sd-rm-range" data-pos="${pos.id}" data-sidx="${sidx}" data-ridx="${ridx}">✕</button>
+      </div>`).join('');
+    return `<div class="day-block">
+      <div class="day-block-head" style="justify-content:space-between;">
+        <input type="date" data-action="sd-date" data-pos="${pos.id}" data-sidx="${sidx}" value="${sd.date||''}"/>
+        <button class="btn-danger-sm" data-action="sd-remove" data-pos="${pos.id}" data-sidx="${sidx}">quitar fecha</button>
+      </div>
+      <div class="ranges">${rangesHtml}</div>
+      <button class="add-range-btn" data-action="sd-add-range" data-pos="${pos.id}" data-sidx="${sidx}">+ agregar otro rango horario</button>
+    </div>`;
+  }).join('');
+  let daysHtml = DAYS.map(d=>{
+    const cfg = pos.days[d.key];
+    let rangesHtml = cfg.ranges.map((r,idx)=>`
+      <div class="range-row">
+        <input type="time" data-pos="${pos.id}" data-day="${d.key}" data-ridx="${idx}" data-rfield="start" value="${r.start}"/>
+        <span class="range-sep">–</span>
+        <input type="time" data-pos="${pos.id}" data-day="${d.key}" data-ridx="${idx}" data-rfield="end" value="${r.end}"/>
+        <button class="rm-range" data-action="rm-range" data-pos="${pos.id}" data-day="${d.key}" data-ridx="${idx}">✕</button>
+      </div>`).join('');
+    return `<div class="day-block">
+      <div class="day-block-head">
+        <label class="switch"><input type="checkbox" data-action="toggle-day" data-pos="${pos.id}" data-day="${d.key}" ${cfg.enabled?'checked':''}/><span class="slider"></span></label>
+        <div class="day-name">${d.label}</div>
+      </div>
+      ${cfg.enabled ? `<div class="ranges">${rangesHtml}</div><button class="add-range-btn" data-action="add-range" data-pos="${pos.id}" data-day="${d.key}">+ agregar otro rango horario</button>` : ''}
+    </div>`;
+  }).join('');
+  return `<div class="position-card">
+    <div class="position-head">
+      <input type="text" data-action="pos-name" data-pos="${pos.id}" value="${escapeHtml(pos.name)}"/>
+      ${state.positions.length>1 ? `<button class="btn-danger-sm" data-action="del-position" data-pos="${pos.id}">Eliminar puesto</button>` : ''}
+    </div>
+    <div class="dur-row">
+      <div class="dur-field"><span>Duración (min)</span><input type="number" min="5" step="5" data-action="pos-duration" data-pos="${pos.id}" value="${pos.duration}" style="width:70px;"/></div>
+      <div class="dur-field"><span>Espacio entre citas (min)</span><input type="number" min="0" step="5" data-action="pos-gap" data-pos="${pos.id}" value="${pos.gap}" style="width:70px;"/></div>
+    </div>
+    <div style="margin-top:6px;border-top:1px solid var(--line);padding-top:14px;">
+      <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:13.5px;margin-bottom:4px;">Días de la semana (recurrentes)</div>
+    </div>
+    ${daysHtml}
+    <div style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px;">
+      <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:13.5px;margin-bottom:4px;">Fechas específicas</div>
+      <p class="subtle" style="margin-bottom:10px;">Si coincide con un día recurrente, gana la fecha específica.</p>
+      ${specificHtml}
+      <button class="add-range-btn" style="margin-left:0;" data-action="sd-add-date" data-pos="${pos.id}">+ agregar fecha específica</button>
+    </div>
+  </div>`;
+}
+
+function renderNotificaciones(){
+  const n = state.notifications;
+  return `<div class="card">
+    <h2 class="section-title">Notificación por email de cada reserva</h2>
+    <p class="subtle">Usa EmailJS (gratis hasta 200 emails/mes). Creá una cuenta en emailjs.com, conectá tu Gmail, armá una plantilla, y pegá acá los datos.</p>
+    <label class="fieldlabel">Activar</label>
+    <label class="switch" style="margin-bottom:16px;display:inline-flex;"><input type="checkbox" id="notif-enabled" ${n.enabled?'checked':''}/><span class="slider"></span></label>
+    <div><label class="fieldlabel">Tu email</label><input type="text" id="notif-email" value="${escapeHtml(n.notifyEmail)}" style="margin-bottom:12px;"/></div>
+    <div><label class="fieldlabel">Service ID</label><input type="text" id="notif-service" value="${escapeHtml(n.serviceId)}" style="margin-bottom:12px;"/></div>
+    <div><label class="fieldlabel">Template ID</label><input type="text" id="notif-template" value="${escapeHtml(n.templateId)}" style="margin-bottom:12px;"/></div>
+    <div><label class="fieldlabel">Public Key</label><input type="text" id="notif-key" value="${escapeHtml(n.publicKey)}" style="margin-bottom:16px;"/></div>
+    <button class="btn-black" data-action="save-notifications"><span>Guardar</span><span class="arrow">→</span></button>
+    <span class="save-msg">${state.saveMsg}</span>
+    <div class="notice">Variables de plantilla: {{nombre}}, {{email}}, {{telefono}}, {{puesto}}, {{fecha}}, {{hora}}, {{to_email}}.<br/>
+    Además, cada reserva ya se agrega automáticamente a tu Google Calendar (el mismo que usa tu cuenta de Google), sin configuración extra.</div>
+  </div>`;
+}
+
+function renderReservas(){
+  const upcoming = [...state.bookings].filter(b=>b.date>=dateKey(new Date())).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+  let rows = upcoming.length ? upcoming.map(b=>{
+    const [y,m,d] = b.date.split('-');
+    const candidate = state.candidates.find(c=>c.bookingId===b.id);
+    const isOpen = state.openInterviewFormFor === b.id;
+    return `<div class="booking-item" style="flex-direction:column;align-items:stretch;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+        <div><div class="b-name">${escapeHtml(b.name)}</div><div class="b-pos">${escapeHtml(b.positionName)}</div>
+          <div style="color:var(--ink-soft);">${escapeHtml(b.email)} · ${escapeHtml(b.phone)}</div></div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <span class="b-when">${d}/${m} ${b.time}</span>
+          <button class="btn-outline-sm" data-action="toggle-interview" data-id="${b.id}">${candidate ? 'Editar ficha' : 'Completar ficha'}</button>
+          <button class="btn-danger-sm" data-action="cancel-booking" data-id="${b.id}">cancelar</button>
+        </div>
+      </div>
+      ${isOpen ? renderInterviewForm(b, candidate) : ''}
+    </div>`;
+  }).join('') : `<div class="empty">Todavía no hay reservas.</div>`;
+  return `<div class="card">
+    <h2 class="section-title">Próximas reservas</h2>
+    <p class="subtle">Cada reserva ya se agregó a tu Google Calendar automáticamente. Podés completar la ficha de entrevista de cada candidato acá mismo.</p>
+    <div>${rows}</div>
+  </div>`;
+}
+
+function renderInterviewForm(b, c){
+  c = c || {};
+  return `<div class="interview-form" data-booking="${b.id}">
+    <div><label class="fieldlabel">Edad</label><input type="number" min="0" class="if-field" data-field="edad" value="${escapeHtml(c.edad||'')}"/></div>
+    <div><label class="fieldlabel">Dónde vive</label><input type="text" class="if-field" data-field="ubicacion" value="${escapeHtml(c.ubicacion||'')}"/></div>
+    <div><label class="fieldlabel">Preferencia horaria</label><input type="text" class="if-field" data-field="preferenciaHoraria" value="${escapeHtml(c.preferenciaHoraria||'')}" placeholder="Ej: mañana, tarde..."/></div>
+    <div><label class="fieldlabel">Local de destino</label>
+      <select class="if-field" data-field="localDestino">
+        <option value="">—</option>
+        ${LOCAL_DESTINO_OPTS.map(o=>`<option value="${o}" ${c.localDestino===o?'selected':''}>${o}</option>`).join('')}
+      </select>
+    </div>
+    <div><label class="fieldlabel">Modalidad</label>
+      <select class="if-field" data-field="modalidad">
+        <option value="">—</option>
+        ${MODALIDAD_OPTS.map(o=>`<option value="${o}" ${c.modalidad===o?'selected':''}>${o}</option>`).join('')}
+      </select>
+    </div>
+    <div><label class="fieldlabel">¿Trabaja actualmente?</label>
+      <select class="if-field" data-field="trabajaActualmente">
+        <option value="">—</option>
+        <option value="Si" ${c.trabajaActualmente==='Si'?'selected':''}>Sí</option>
+        <option value="No" ${c.trabajaActualmente==='No'?'selected':''}>No</option>
+      </select>
+    </div>
+    <div><label class="fieldlabel">Fecha posible de inicio</label><input type="date" class="if-field" data-field="fechaPosibleInicio" value="${escapeHtml(c.fechaPosibleInicio||'')}"/></div>
+    <div class="full"><label class="fieldlabel">Info extra</label><textarea class="if-field" data-field="infoExtra">${escapeHtml(c.infoExtra||'')}</textarea></div>
+    <div class="full"><button class="btn-black" data-action="save-interview" data-booking="${b.id}"><span>Guardar ficha</span><span class="arrow">→</span></button><span class="save-msg">${state.saveMsg}</span></div>
+  </div>`;
+}
+
+function renderCandidatos(){
+  return `<div class="card">
+    <h2 class="section-title">Base de candidatos</h2>
+    <p class="subtle">Buscá por nombre, teléfono o puesto.</p>
+    <div class="search-row">
+      <input type="text" id="candidate-search-input" placeholder="Ej: Juan, 11..., Puesto general" value="${escapeHtml(state.candidateSearchQuery)}"/>
+      <button class="btn-black" data-action="do-search"><span>Buscar</span><span class="arrow">→</span></button>
+    </div>
+    <div>${renderCandidateResults()}</div>
+  </div>`;
+}
+function renderCandidateResults(){
+  if(!state.candidateSearchDone) return `<div class="empty">Escribí algo y tocá "Buscar" (dejalo vacío para ver a todos).</div>`;
+  if(!state.candidateSearchResults.length) return `<div class="empty">No se encontraron candidatos.</div>`;
+  return state.candidateSearchResults.map(c=>`
+    <div class="candidate-card">
+      <div class="candidate-top">
+        <div class="candidate-name">${escapeHtml(c.nombre)}</div>
+        <div class="candidate-tags"><span class="tag">${escapeHtml(c.puesto||'—')}</span>${c.modalidad?`<span class="tag">${escapeHtml(c.modalidad)}</span>`:''}</div>
+      </div>
+      <div class="candidate-grid">
+        <div><span class="k">Email</span>${escapeHtml(c.email)}</div>
+        <div><span class="k">Teléfono</span>${escapeHtml(c.telefono)}</div>
+        <div><span class="k">Edad</span>${escapeHtml(c.edad||'—')}</div>
+        <div><span class="k">Vive en</span>${escapeHtml(c.ubicacion||'—')}</div>
+        <div><span class="k">Pref. horaria</span>${escapeHtml(c.preferenciaHoraria||'—')}</div>
+        <div><span class="k">Local destino</span>${escapeHtml(c.localDestino||'—')}</div>
+        <div><span class="k">Trabaja actualmente</span>${escapeHtml(c.trabajaActualmente||'—')}</div>
+        <div><span class="k">Posible inicio</span>${escapeHtml(c.fechaPosibleInicio||'—')}</div>
+      </div>
+      ${c.infoExtra ? `<div style="margin-top:8px;font-size:12.5px;"><span style="color:var(--ink-soft);">Info extra:</span> ${escapeHtml(c.infoExtra)}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function renderPublic(){
+  if(state.step==='confirmed' && state.confirmed) return renderConfirmed();
+  if(state.step==='form') return renderForm();
+  if(state.step==='slot' || state.step==='date') return renderDateSlot();
+  return renderIntro();
+}
+function renderIntro(){
+  const opts = state.positions.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+  return `<div class="card">
+    <h1 class="intro-title">${escapeHtml(state.messages.introTitle||'')}</h1>
+    <div class="intro-msg">${escapeHtml(state.messages.intro)}</div>
+    ${state.positions.length ? `
+      <div><label class="fieldlabel">Puesto de trabajo</label><select id="position-select">${opts}</select></div>
+      <div style="margin-top:18px;"><button class="btn-black" data-action="go-date"><span>Ver fechas disponibles</span><span class="arrow">→</span></button></div>
+    ` : `<div class="empty">El anfitrión todavía no configuró puestos disponibles.</div>`}
+  </div>`;
+}
+function renderDateSlot(){
+  const pos = state.positions.find(p=>p.id===state.selectedPositionId);
+  let dateChips = state.availableDates.map(key=>{
+    const [y,m,d] = key.split('-').map(Number); const dt = new Date(y,m-1,d);
+    const sel = state.selectedDate===key;
+    return `<div class="date-chip ${sel?'selected':''}" data-action="pick-date" data-date="${key}">
+      <span class="dow">${DAYS[dt.getDay()].short}</span><span class="dnum">${dt.getDate()}</span><span class="dmon">${MONTHS[dt.getMonth()]}</span>
+    </div>`;
+  }).join('');
+  if(!state.availableDates.length) dateChips = `<div class="empty">No hay fechas habilitadas para este puesto todavía.</div>`;
+  let rightPanel = `<div class="empty">Elegí una fecha para ver los horarios.</div>`;
+  if(state.selectedDate){
+    const [y,m,d] = state.selectedDate.split('-').map(Number); const dt = new Date(y,m-1,d);
+    let slotHtml = state.availableSlots.length ? state.availableSlots.map(t=>`<button class="slot-btn ${state.selectedSlot===t?'selected':''}" data-action="pick-slot" data-slot="${t}">${t}</button>`).join('') : `<div class="empty">No quedan horarios libres ese día.</div>`;
+    rightPanel = `<h2 class="section-title">${fmtDateLong(dt)}</h2><p class="subtle">Puesto: ${escapeHtml(pos.name)}</p><div class="slot-grid">${slotHtml}</div>
+      ${state.selectedSlot ? `<div style="margin-top:18px;"><button class="btn-black" data-action="go-form"><span>Continuar</span><span class="arrow">→</span></button></div>` : ''}`;
+  }
+  return `<button class="back-link" data-action="back-intro">← Cambiar puesto</button>
+    <div class="card"><div class="grid-2">
+      <div><h2 class="section-title">Elegí una fecha</h2><p class="subtle">Próximos días con disponibilidad para este puesto.</p><div class="date-list">${dateChips}</div></div>
+      <div>${rightPanel}</div>
+    </div></div>`;
+}
+function renderForm(){
+  const pos = state.positions.find(p=>p.id===state.selectedPositionId);
+  const [y,m,d] = state.selectedDate.split('-').map(Number); const dt = new Date(y,m-1,d);
+  return `<button class="back-link" data-action="back-slot">← Elegir otro horario</button>
+    <div class="card">
+      <h2 class="section-title">Completá tus datos</h2>
+      <p class="subtle">${fmtDateLong(dt)} · ${state.selectedSlot}hs</p>
+      <div class="locked-field"><span>Puesto</span><span class="lval">${escapeHtml(pos.name)}</span></div>
+      <form class="contact-form" id="contact-form">
+        <div><label class="fieldlabel">Nombre completo</label><input type="text" id="f-name" required/></div>
+        <div><label class="fieldlabel">Email</label><input type="email" id="f-email" required/></div>
+        <div><label class="fieldlabel">Teléfono</label><input type="tel" id="f-phone" required/></div>
+        <button type="submit" class="btn-black" style="width:100%;justify-content:center;"><span>Confirmar reserva</span><span class="arrow">→</span></button>
+      </form>
+    </div>`;
+}
+function renderConfirmed(){
+  const b = state.confirmed; const [y,m,d] = b.date.split('-');
+  return `<div class="card">
+    <div class="confirm-badge">✓ Reserva confirmada</div>
+    <div class="confirm-detail"><span class="k">Puesto</span><span class="v">${escapeHtml(b.positionName)}</span></div>
+    <div class="confirm-detail"><span class="k">Fecha</span><span class="v">${d}/${m}</span></div>
+    <div class="confirm-detail"><span class="k">Hora</span><span class="v">${b.time}hs</span></div>
+    <div class="confirm-detail"><span class="k">Nombre</span><span class="v">${escapeHtml(b.name)}</span></div>
+    <div class="confirm-msg">${escapeHtml(state.confirmMsg||'')}</div>
+    <div class="actions-row">
+      <button class="btn-black" data-action="download-ics"><span>Agregar a mi calendario</span><span class="arrow">↓</span></button>
+      <button class="btn-ghost" data-action="view-public-reset">Hacer otra reserva</button>
+    </div>
+  </div>`;
+}
+
+// ---------------------------------------------------------------------
+// HANDLERS
+// ---------------------------------------------------------------------
+function attachHandlers(){
+  document.querySelectorAll('[data-action="view-public"]').forEach(el=>el.onclick=()=>switchView('public'));
+  document.querySelectorAll('[data-action="view-host"]').forEach(el=>el.onclick=()=>switchView('host'));
+  document.querySelectorAll('[data-host-tab]').forEach(el=>el.onclick=()=>{
+    state.hostTab = el.dataset.hostTab;
+    if(state.hostTab==='candidatos'){ state.candidateSearchDone=false; state.candidateSearchResults=[]; }
+    render();
+  });
+
+  document.querySelectorAll('[data-action="upload-logo"]').forEach(el=>{
+    el.onchange = ()=>{
+      const file = el.files[0]; if(!file) return;
+      const reader = new FileReader();
+      reader.onload = async ()=>{
+        try{
+          const r = await apiPost({ action:'uploadLogo', dataUrl: reader.result });
+          state.branding['logo'+el.dataset.n] = r.url;
+          await saveConfigToServer(false);
+          render();
+        }catch(e){ alert('No se pudo subir el logo: ' + e.message); }
+      };
+      reader.readAsDataURL(file);
+    };
+  });
+  document.querySelectorAll('[data-action="remove-logo"]').forEach(el=>{
+    el.onclick = async ()=>{ state.branding['logo'+el.dataset.n] = null; await saveConfigToServer(false); render(); };
+  });
+
+  const saveMsgsBtn = document.querySelector('[data-action="save-messages"]');
+  if(saveMsgsBtn){
+    saveMsgsBtn.onclick = async ()=>{
+      state.messages.introTitle = document.getElementById('msg-intro-title').value;
+      state.messages.intro = document.getElementById('msg-intro').value;
+      state.messages.confirmation = document.getElementById('msg-confirm').value;
+      await saveConfigToServer(true);
+    };
+  }
+
+  document.querySelectorAll('[data-action="pos-name"]').forEach(el=>{ el.oninput = ()=>{ getPos(el.dataset.pos).name = el.value; }; });
+  document.querySelectorAll('[data-action="pos-duration"]').forEach(el=>{ el.oninput = ()=>{ getPos(el.dataset.pos).duration = parseInt(el.value,10)||30; }; });
+  document.querySelectorAll('[data-action="pos-gap"]').forEach(el=>{ el.oninput = ()=>{ getPos(el.dataset.pos).gap = parseInt(el.value,10)||0; }; });
+  document.querySelectorAll('[data-action="toggle-day"]').forEach(el=>{
+    el.onchange = ()=>{
+      const p = getPos(el.dataset.pos);
+      p.days[el.dataset.day].enabled = el.checked;
+      if(el.checked && p.days[el.dataset.day].ranges.length===0) p.days[el.dataset.day].ranges.push({start:'09:00', end:'17:00'});
+      render();
+    };
+  });
+  document.querySelectorAll('[data-action="add-range"]').forEach(el=>{ el.onclick = ()=>{ getPos(el.dataset.pos).days[el.dataset.day].ranges.push({start:'09:00', end:'17:00'}); render(); }; });
+  document.querySelectorAll('[data-action="rm-range"]').forEach(el=>{ el.onclick = ()=>{ getPos(el.dataset.pos).days[el.dataset.day].ranges.splice(parseInt(el.dataset.ridx,10),1); render(); }; });
+  document.querySelectorAll('input[data-rfield]').forEach(el=>{ el.onchange = ()=>{ getPos(el.dataset.pos).days[el.dataset.day].ranges[parseInt(el.dataset.ridx,10)][el.dataset.rfield] = el.value; }; });
+
+  document.querySelectorAll('[data-action="sd-add-date"]').forEach(el=>{ el.onclick = ()=>{ getPos(el.dataset.pos).specificDates.push({date:'', ranges:[{start:'09:00',end:'17:00'}]}); render(); }; });
+  document.querySelectorAll('[data-action="sd-remove"]').forEach(el=>{ el.onclick = ()=>{ getPos(el.dataset.pos).specificDates.splice(parseInt(el.dataset.sidx,10),1); render(); }; });
+  document.querySelectorAll('[data-action="sd-date"]').forEach(el=>{ el.onchange = ()=>{ getPos(el.dataset.pos).specificDates[parseInt(el.dataset.sidx,10)].date = el.value; }; });
+  document.querySelectorAll('[data-action="sd-add-range"]').forEach(el=>{ el.onclick = ()=>{ getPos(el.dataset.pos).specificDates[parseInt(el.dataset.sidx,10)].ranges.push({start:'09:00',end:'17:00'}); render(); }; });
+  document.querySelectorAll('[data-action="sd-rm-range"]').forEach(el=>{ el.onclick = ()=>{ getPos(el.dataset.pos).specificDates[parseInt(el.dataset.sidx,10)].ranges.splice(parseInt(el.dataset.ridx,10),1); render(); }; });
+  document.querySelectorAll('[data-action="sd-range"]').forEach(el=>{ el.onchange = ()=>{ getPos(el.dataset.pos).specificDates[parseInt(el.dataset.sidx,10)].ranges[parseInt(el.dataset.ridx,10)][el.dataset.rfield] = el.value; }; });
+
+  const addPosBtn = document.querySelector('[data-action="add-position"]');
+  if(addPosBtn) addPosBtn.onclick = ()=>{ state.positions.push(defaultPosition('Nuevo puesto')); render(); };
+  document.querySelectorAll('[data-action="del-position"]').forEach(el=>{ el.onclick = ()=>{ state.positions = state.positions.filter(p=>p.id!==el.dataset.pos); render(); }; });
+  const savePosBtn = document.querySelector('[data-action="save-positions"]');
+  if(savePosBtn) savePosBtn.onclick = ()=> saveConfigToServer(true);
+
+  const saveNotifBtn = document.querySelector('[data-action="save-notifications"]');
+  if(saveNotifBtn){
+    saveNotifBtn.onclick = async ()=>{
+      state.notifications = {
+        enabled: document.getElementById('notif-enabled').checked,
+        notifyEmail: document.getElementById('notif-email').value.trim(),
+        serviceId: document.getElementById('notif-service').value.trim(),
+        templateId: document.getElementById('notif-template').value.trim(),
+        publicKey: document.getElementById('notif-key').value.trim(),
+      };
+      await saveConfigToServer(true);
+    };
+  }
+
+  document.querySelectorAll('[data-action="cancel-booking"]').forEach(el=>{
+    el.onclick = async ()=>{
+      try{ await apiPost({action:'deleteBooking', id: el.dataset.id}); await loadHostData(); render(); }
+      catch(e){ alert('No se pudo cancelar: ' + e.message); }
+    };
+  });
+
+  document.querySelectorAll('[data-action="toggle-interview"]').forEach(el=>{
+    el.onclick = ()=>{ state.openInterviewFormFor = state.openInterviewFormFor===el.dataset.id ? null : el.dataset.id; render(); };
+  });
+  document.querySelectorAll('[data-action="save-interview"]').forEach(el=>{
+    el.onclick = async ()=>{
+      const bookingId = el.dataset.booking;
+      const b = state.bookings.find(x=>x.id===bookingId);
+      const form = document.querySelector(`.interview-form[data-booking="${bookingId}"]`);
+      const candidate = { bookingId, nombre: b.name, email: b.email, telefono: b.phone, puesto: b.positionName };
+      form.querySelectorAll('.if-field').forEach(f=>{ candidate[f.dataset.field] = f.value; });
+      try{
+        await apiPost({ action:'saveCandidate', candidate });
+        state.saveMsg = 'Ficha guardada ✓';
+        const c = await apiGet('searchCandidates', {q:''});
+        state.candidates = c.candidates;
+        render(); setTimeout(()=>{state.saveMsg='';render();},2000);
+      }catch(e){ alert('No se pudo guardar la ficha: ' + e.message); }
+    };
+  });
+
+  const searchBtn = document.querySelector('[data-action="do-search"]');
+  if(searchBtn){
+    searchBtn.onclick = async ()=>{
+      state.candidateSearchQuery = document.getElementById('candidate-search-input').value;
+      try{
+        const r = await apiGet('searchCandidates', {q: state.candidateSearchQuery});
+        state.candidateSearchResults = r.candidates; state.candidateSearchDone = true; render();
+      }catch(e){ alert('Error al buscar: ' + e.message); }
+    };
+  }
+
+  const goDateBtn = document.querySelector('[data-action="go-date"]');
+  if(goDateBtn){
+    goDateBtn.onclick = async ()=>{
+      const sel = document.getElementById('position-select');
+      state.selectedPositionId = sel.value; state.step = 'date'; state.selectedDate=null; state.selectedSlot=null;
+      try{ const r = await apiGet('getDates', {positionId: state.selectedPositionId}); state.availableDates = r.dates; render(); }
+      catch(e){ alert('Error: ' + e.message); }
+    };
+  }
+  document.querySelectorAll('[data-action="back-intro"]').forEach(el=>el.onclick=()=>{ state.step='intro'; state.selectedDate=null; state.selectedSlot=null; render(); });
+  document.querySelectorAll('[data-action="back-slot"]').forEach(el=>el.onclick=()=>{ state.step='date'; state.selectedSlot=null; render(); });
+  document.querySelectorAll('[data-action="pick-date"]').forEach(el=>{
+    el.onclick = async ()=>{
+      state.selectedDate = el.dataset.date; state.selectedSlot=null;
+      try{ const r = await apiGet('getSlots', {positionId: state.selectedPositionId, date: state.selectedDate}); state.availableSlots = r.slots; render(); }
+      catch(e){ alert('Error: ' + e.message); }
+    };
+  });
+  document.querySelectorAll('[data-action="pick-slot"]').forEach(el=>{ el.onclick = ()=>{ state.selectedSlot = el.dataset.slot; render(); }; });
+  const goFormBtn = document.querySelector('[data-action="go-form"]');
+  if(goFormBtn){ goFormBtn.onclick = ()=>{ state.step='form'; render(); }; }
+
+  const form = document.getElementById('contact-form');
+  if(form){
+    form.onsubmit = async (e)=>{
+      e.preventDefault();
+      const name = document.getElementById('f-name').value.trim();
+      const email = document.getElementById('f-email').value.trim();
+      const phone = document.getElementById('f-phone').value.trim();
+      if(!name||!email||!phone) return;
+      try{
+        const r = await apiPost({ action:'createBooking', booking:{ positionId: state.selectedPositionId, date: state.selectedDate, time: state.selectedSlot, name, email, phone } });
+        state.confirmed = r.booking; state.confirmMsg = r.confirmationMessage; state.step='confirmed';
+        sendBookingNotification(r.booking);
+        render();
+      }catch(err){
+        alert(err.message);
+        state.selectedSlot = null; state.step = 'date';
+        try{ const r2 = await apiGet('getSlots', {positionId: state.selectedPositionId, date: state.selectedDate}); state.availableSlots = r2.slots; }catch(e2){}
+        render();
+      }
+    };
+  }
+  const icsBtn = document.querySelector('[data-action="download-ics"]');
+  if(icsBtn){ icsBtn.onclick = ()=> downloadIcs(state.confirmed, state.confirmed.positionName); }
+  const resetBtn = document.querySelector('[data-action="view-public-reset"]');
+  if(resetBtn){ resetBtn.onclick = ()=> switchView('public'); }
+}
+
+// ---------------------------------------------------------------------
+// INIT
+// ---------------------------------------------------------------------
+(async function init(){
+  if(!isConfigured){ render(); return; }
+  try{ await loadPublicConfig(); render(); }
+  catch(e){ state.loadError = e.message; render(); }
+})();
+</script>
+
