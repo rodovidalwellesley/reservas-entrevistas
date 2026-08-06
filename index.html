@@ -220,6 +220,8 @@ let state = {
   confirmed: null,
   candidateSearchQuery:'', candidateSearchResults:[], candidateSearchDone:false,
   openInterviewFormFor: null,
+  manualBooking: { positionId:'', date:'', time:'', slots:[], name:'', email:'', phone:'' },
+  manualSaveMsg: '',
 };
 
 async function loadPublicConfig(){
@@ -524,7 +526,7 @@ function renderReservas(){
     const isOpen = state.openInterviewFormFor === b.id;
     return `<div class="booking-item" style="flex-direction:column;align-items:stretch;">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
-        <div><div class="b-name">${escapeHtml(b.name)}</div><div class="b-pos">${escapeHtml(b.positionName)}</div>
+        <div><div class="b-name">${escapeHtml(b.name)} ${b.bookedBy==='anfitrion' ? '<span class="tag">Reservado por vos</span>' : ''}</div><div class="b-pos">${escapeHtml(b.positionName)}</div>
           <div style="color:var(--ink-soft);">${escapeHtml(b.email)} · ${escapeHtml(b.phone)}</div></div>
         <div style="display:flex;align-items:center;gap:14px;">
           <span class="b-when">${d}/${m} ${b.time}</span>
@@ -539,6 +541,31 @@ function renderReservas(){
     <h2 class="section-title">Próximas reservas</h2>
     <p class="subtle">Cada reserva ya se agregó a tu Google Calendar automáticamente. Podés completar la ficha de entrevista de cada candidato acá mismo.</p>
     <div>${rows}</div>
+  </div>
+  <div class="card">
+    <h2 class="section-title">Agendar una entrevista manualmente</h2>
+    <p class="subtle">Para cuando el candidato te contactó por otro medio (local, mail, WhatsApp) y querés agendarlo vos mismo con los mismos datos que completaría él.</p>
+    ${renderManualBookingForm()}
+  </div>`;
+}
+
+function renderManualBookingForm(){
+  if(!state.manualBooking.positionId && state.positions.length) state.manualBooking.positionId = state.positions[0].id;
+  const opts = state.positions.map(p=>`<option value="${p.id}" ${state.manualBooking.positionId===p.id?'selected':''}>${escapeHtml(p.name)}</option>`).join('');
+  let slotsHtml = '';
+  if(state.manualBooking.date && state.manualBooking.positionId){
+    slotsHtml = state.manualBooking.slots.length
+      ? `<div class="slot-grid" style="margin-top:10px;">${state.manualBooking.slots.map(t=>`<button class="slot-btn ${state.manualBooking.time===t?'selected':''}" data-action="manual-pick-slot" data-slot="${t}">${t}</button>`).join('')}</div>`
+      : `<div class="empty" style="margin-top:8px;">No hay horarios libres ese día para ese puesto.</div>`;
+  }
+  return `<div class="interview-form" style="grid-template-columns:1fr 1fr;">
+    <div><label class="fieldlabel">Puesto</label><select id="manual-position">${opts}</select></div>
+    <div><label class="fieldlabel">Fecha</label><input type="date" id="manual-date" value="${state.manualBooking.date||''}"/></div>
+    <div class="full">${slotsHtml}</div>
+    <div><label class="fieldlabel">Nombre completo</label><input type="text" id="manual-name" value="${escapeHtml(state.manualBooking.name||'')}"/></div>
+    <div><label class="fieldlabel">Email</label><input type="email" id="manual-email" value="${escapeHtml(state.manualBooking.email||'')}"/></div>
+    <div><label class="fieldlabel">Teléfono</label><input type="tel" id="manual-phone" value="${escapeHtml(state.manualBooking.phone||'')}"/></div>
+    <div class="full"><button class="btn-black" data-action="submit-manual-booking"><span>Agendar entrevista</span><span class="arrow">→</span></button><span class="save-msg">${state.manualSaveMsg||''}</span></div>
   </div>`;
 }
 
@@ -568,6 +595,14 @@ function renderInterviewForm(b, c){
       </select>
     </div>
     <div><label class="fieldlabel">Fecha posible de inicio</label><input type="date" class="if-field" data-field="fechaPosibleInicio" value="${escapeHtml(c.fechaPosibleInicio||'')}"/></div>
+    <div><label class="fieldlabel">¿De dónde llegó el CV?</label>
+      <select class="if-field" data-field="origenCV">
+        <option value="">—</option>
+        <option value="Local" ${c.origenCV==='Local'?'selected':''}>Local</option>
+        <option value="Mail" ${c.origenCV==='Mail'?'selected':''}>Mail</option>
+        <option value="WhatsApp" ${c.origenCV==='WhatsApp'?'selected':''}>WhatsApp</option>
+      </select>
+    </div>
     <div class="full"><label class="fieldlabel">Info extra</label><textarea class="if-field" data-field="infoExtra">${escapeHtml(c.infoExtra||'')}</textarea></div>
     <div class="full"><button class="btn-black" data-action="save-interview" data-booking="${b.id}"><span>Guardar ficha</span><span class="arrow">→</span></button><span class="save-msg">${state.saveMsg}</span></div>
   </div>`;
@@ -609,6 +644,7 @@ function renderCandidateResults(){
         <div><span class="k">Local destino</span>${escapeHtml(c.localDestino||'—')}</div>
         <div><span class="k">Trabaja actualmente</span>${escapeHtml(c.trabajaActualmente||'—')}</div>
         <div><span class="k">Posible inicio</span>${escapeHtml(c.fechaPosibleInicio||'—')}</div>
+        <div><span class="k">Origen del CV</span>${escapeHtml(c.origenCV||'—')}</div>
       </div>
       ${c.infoExtra ? `<div style="margin-top:8px;font-size:12.5px;"><span style="color:var(--ink-soft);">Info extra:</span> ${escapeHtml(c.infoExtra)}</div>` : ''}
       ${isOpen ? renderInterviewForm(pseudoBooking, c) : ''}
@@ -778,6 +814,53 @@ function attachHandlers(){
       catch(e){ alert('No se pudo cancelar: ' + e.message); }
     };
   });
+
+  const manualPos = document.getElementById('manual-position');
+  const manualDate = document.getElementById('manual-date');
+  async function refreshManualSlots(){
+    state.manualBooking.name = document.getElementById('manual-name') ? document.getElementById('manual-name').value : state.manualBooking.name;
+    state.manualBooking.email = document.getElementById('manual-email') ? document.getElementById('manual-email').value : state.manualBooking.email;
+    state.manualBooking.phone = document.getElementById('manual-phone') ? document.getElementById('manual-phone').value : state.manualBooking.phone;
+    if(state.manualBooking.positionId && state.manualBooking.date){
+      try{
+        const r = await apiGet('getSlots', {positionId: state.manualBooking.positionId, date: state.manualBooking.date});
+        state.manualBooking.slots = r.slots;
+      }catch(e){ state.manualBooking.slots = []; }
+    } else {
+      state.manualBooking.slots = [];
+    }
+    state.manualBooking.time = '';
+    render();
+  }
+  if(manualPos) manualPos.onchange = ()=>{ state.manualBooking.positionId = manualPos.value; refreshManualSlots(); };
+  if(manualDate) manualDate.onchange = ()=>{ state.manualBooking.date = manualDate.value; refreshManualSlots(); };
+  document.querySelectorAll('[data-action="manual-pick-slot"]').forEach(el=>{
+    el.onclick = ()=>{
+      state.manualBooking.name = document.getElementById('manual-name').value;
+      state.manualBooking.email = document.getElementById('manual-email').value;
+      state.manualBooking.phone = document.getElementById('manual-phone').value;
+      state.manualBooking.time = el.dataset.slot; render();
+    };
+  });
+  const submitManualBtn = document.querySelector('[data-action="submit-manual-booking"]');
+  if(submitManualBtn){
+    submitManualBtn.onclick = async ()=>{
+      const mb = state.manualBooking;
+      mb.name = document.getElementById('manual-name').value.trim();
+      mb.email = document.getElementById('manual-email').value.trim();
+      mb.phone = document.getElementById('manual-phone').value.trim();
+      if(!mb.positionId || !mb.date || !mb.time || !mb.name || !mb.email || !mb.phone){
+        alert('Completá puesto, fecha, horario, nombre, email y teléfono.'); return;
+      }
+      try{
+        await apiPost({ action:'createBookingAsHost', booking:{ positionId: mb.positionId, date: mb.date, time: mb.time, name: mb.name, email: mb.email, phone: mb.phone } });
+        state.manualSaveMsg = 'Agendado ✓';
+        state.manualBooking = { positionId: mb.positionId, date:'', time:'', slots:[], name:'', email:'', phone:'' };
+        await loadHostData();
+        render(); setTimeout(()=>{state.manualSaveMsg='';render();},2500);
+      }catch(e){ alert('No se pudo agendar: ' + e.message); }
+    };
+  }
 
   document.querySelectorAll('[data-action="toggle-interview"]').forEach(el=>{
     el.onclick = ()=>{ state.openInterviewFormFor = state.openInterviewFormFor===el.dataset.id ? null : el.dataset.id; render(); };
